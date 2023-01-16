@@ -25,8 +25,8 @@ void ext_main(void *r)
 	class_addmethod(c, (method)fl_wkey_mousedown, "mousedown", A_CANT, 0);
 	
 	class_addmethod(c, (method)fl_wkey_int, "int", A_LONG, 0);
-	//class_addmethod(c, (method)fl_wkey_float, "float", A_float, 0);
-	//class_addmethod(c, (method)fl_wkey_bang, "bang", 0);
+	class_addmethod(c, (method)fl_wkey_float, "float", A_FLOAT, 0);
+	class_addmethod(c, (method)fl_wkey_bang, "bang", 0);
 
 	class_addmethod(c, (method)fl_wkey_message, "div", A_GIMME, 0);
 	
@@ -162,10 +162,9 @@ void fl_wkey_free(t_fl_wkey *x)
 	jbox_free((t_jbox *)x);
 }
 
-void fl_wkey_int(t_fl_wkey *x, long n)
-{
-	if (n != n) { return; }
-}
+void fl_wkey_int(t_fl_wkey *x, long n) {}
+void fl_wkey_float(t_fl_wkey *x, double f) {}
+void fl_wkey_bang(t_fl_wkey *x) {}
 
 void fl_wkey_message(t_fl_wkey *x, t_symbol *s, long argc, t_atom *argv)
 {
@@ -188,72 +187,55 @@ void fl_wkey_message(t_fl_wkey *x, t_symbol *s, long argc, t_atom *argv)
 	lenwscale = ac - 2;
 	long *pwscale = (long *)sysmem_newptr(lenwscale * sizeof(long));
 	if (!pwscale) { object_error((t_object *)x, "out of memory for pwscale"); return; }
-	for (long i = 0; i < lenwscale; i++) { *pwscale = (long)atom_getlong(ap + 2 + i); }
+	for (long i = 0; i < lenwscale; i++) { pwscale[i] = (long)atom_getlong(ap + 2 + i); }
 
 	fl_gnote *pnotes = (fl_gnote *)sysmem_newptr(oct_div * sizeof(fl_gnote));
 	if (!pnotes) { object_error((t_object *)x, "out of memory for pnotes"); sysmem_freeptr(pwscale); return; }
-	for (long i = 0; i < oct_div; i++) { 
-		pnotes->white = 0; 
-		pnotes->prev_ext = 0;
-		pnotes->next_ext = 0;
-	}
 	
 	for (long i = 0; i < oct_div; i++) {
+		pnotes[i].white = 0;
 		for (long j = 0; j < lenwscale; j++) {
-			if (i == pwscale[j]) {
-				pnotes->white = 1; 
-				
-				idx = z_mod(j - 1, lenwscale);
-				if (pwscale[idx] != z_mod((i - 1), oct_div)) { pnotes->prev_ext = 1; }
-
-				idx = z_mod(j + 1, lenwscale);
-				if (pwscale[idx] != z_mod((i + 1), oct_div)) { pnotes->next_ext = 1; }
+			if (i == pwscale[j]) { 
+				pnotes[i].white = 1; 
+				break;
 			}
 		}
 	}
-
+	for (long i = 0; i < oct_div; i++) {
+		if (pnotes[i].white) {
+			pnotes[i].prev_ext = 1;
+			for (long j = 0; j < lenwscale; j++) {
+				idx = z_mod(j - 1, lenwscale);
+				if (pwscale[idx] == z_mod(i - 1, oct_div)) { 
+					pnotes[i].prev_ext = 0; 
+					break;
+				}
+			}
+			pnotes[i].next_ext = 1;
+			for (long j = 0; j < lenwscale; j++) {
+				idx = z_mod(j + 1, lenwscale);
+				if (pwscale[idx] == z_mod(i + 1, oct_div)) { 
+					pnotes[i].next_ext = 0; 
+					break;
+				}
+			}
+		}
+		else{
+			pnotes[i].prev_ext = 0;
+			pnotes[i].next_ext = 0;
+		}
+	}
+	
 	sysmem_freeptr(pwscale);
 
 	if (x->gnotes) { sysmem_freeptr(x->gnotes); }
 	x->gnotes = pnotes;
 	x->oct_div = oct_div;
 
-	//jbox_invalidate_layer((t_object *)x, NULL, gensym("info_layer"));
-	//jbox_redraw((t_jbox *)x); 
+	jbox_invalidate_layer((t_object *)x, NULL, gensym("notes_layer"));
+	jbox_redraw((t_jbox *)x); 
 }
 
-/* outlets ------------------------------------------------------------------- */
-/*
-void fl_wkey_bang(t_fl_wkey *x)
-{
-	outlet_bang(x->outlet_bang);
-}
-void fl_wkey_outmensaje(t_fl_wkey  *x)
-{
-	fl_nota **hnotas = x->notas_out;
-	long total_notas_out = x->total_notas_out;
-	
-	for (int i = 0; i < total_notas_out; i++) {
-		outlet_list(x->outlet_mevent, NULL, (short)hnotas[i]->cnota, hnotas[i]->pnota);
-	}
-}
-void fl_wkey_outcompas(t_fl_wkey  *x)
-{
-	long n_bar = x->n_bar;
-
-	outlet_int(x->outlet_ibar, n_bar);
-
-	x->jn_bar = n_bar;
-	jbox_invalidate_layer((t_object*)x, NULL, ps_bars);
-	jbox_redraw((t_jbox *)x);
-}
-void fl_wkey_outcifra(t_fl_wkey  *x)
-{
-	outlet_float(x->outlet_fcifra, x->negras);
-}
-*/
-
-/* aux ui -------------------------------------------------------------------- */
 long z_mod(long x, long base)
 {
 	long y = x;

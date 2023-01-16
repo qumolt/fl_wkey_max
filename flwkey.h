@@ -119,30 +119,24 @@ typedef struct _fl_wkey
 } t_fl_wkey;
 
 /* methods ------------------------------------------------------------------- */
-	//Max object
 void *fl_wkey_new(t_symbol *s, long argc, t_atom *argv);
 void fl_wkey_assist(t_fl_wkey *x, void *b, long m, long a, char *s);
 
 void fl_wkey_int(t_fl_wkey *x, long n);
+void fl_wkey_float(t_fl_wkey *x, double f);
+void fl_wkey_bang(t_fl_wkey *x);
 void fl_wkey_message(t_fl_wkey *x, t_symbol *s, long argc, t_atom *argv);
-	//---memory
-void fl_wkey_free(t_fl_wkey *x);
-	//---outlets
-//void fl_wkey_bang(t_fl_wkey *x);
 
-	//UI
-//void fl_wkey_tick(t_fl_wkey *x);
+void fl_wkey_free(t_fl_wkey *x);
+
 void fl_wkey_paint(t_fl_wkey *x, t_object *patcherview);
-//void fl_wkey_paint_bars(t_fl_wkey *x, t_object *view, t_rect *rect);
-//void fl_wkey_paint_cursor(t_fl_wkey *x, t_object *view, t_rect *rect);
-//void fl_wkey_paint_textfield(t_fl_wkey *x, t_object *view, t_rect *rect);
+
 void fl_wkey_mousedrag(t_fl_wkey *x, t_object *patcherview, t_pt pt, long modifiers);
 void fl_wkey_mouseup(t_fl_wkey *x, t_object *patcherview, t_pt pt, long modifiers);
 void fl_wkey_mousedown(t_fl_wkey *x, t_object *patcherview, t_pt pt, long modifiers);
 void mouse_sendkey(t_fl_wkey *x, t_object *patcherview, t_pt pt);
 //t_max_err fl_wkey_notify(t_fl_wkey *x, t_symbol *s, t_symbol *msg, void *sender, void *data);
 
-//aux
 long z_mod(long x, long base);
 t_double huetorgb(double p, double q, double t);
 t_jrgb hsltorgb(double h, double s, double l);
