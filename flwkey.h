@@ -75,6 +75,9 @@ static t_symbol *ps_acc_write;
 #define SUPMARGIN 10.
 #define ALLFRAME 2.
 #define C4OCTAVE 2
+#define ZEROMARKD 3. 
+#define LENPOLYNOTES 32
+#define POLYMARKE 6.
 
 //#define BOX_TOTAL_W (600.)
 //#define BOX_TOTAL_H (200.)
@@ -98,13 +101,16 @@ typedef struct _fl_wkey
 	t_jbox	j_box; 	//t_pxjbox p_obj -> msp externals
 	
 	t_jrgba u_background;   // background color
-	t_jrgba u_lineas;		// lines color
-	t_jrgba u_cursor;		// cursor color
-	t_jrgba	j_rectcolor;	// rectangle color
-	t_jrgba	j_overcolor;	// rectangle over color
-	t_jrgba j_textcolor;//textfield
-	t_jrgba j_textbg;//textfield
+	//t_jrgba u_lineas;		// lines color
+	//t_jrgba u_cursor;		// cursor color
+	//t_jrgba	j_rectcolor;	// rectangle color
+	//t_jrgba	j_overcolor;	// rectangle over color
+	//t_jrgba j_textcolor;	//textfield
+	//t_jrgba j_textbg;		//textfield
 	//long j_overnota;		// index de la nota bajo el mouse
+
+	long polynotes[LENPOLYNOTES];
+	long total_polynotes;
 
 	fl_gnote *gnotes;
 	long oct_div;
@@ -122,10 +128,12 @@ typedef struct _fl_wkey
 void *fl_wkey_new(t_symbol *s, long argc, t_atom *argv);
 void fl_wkey_assist(t_fl_wkey *x, void *b, long m, long a, char *s);
 
+void fl_wkey_list(t_fl_wkey *x, t_symbol *s, long argc, t_atom *argv);
 void fl_wkey_int(t_fl_wkey *x, long n);
 void fl_wkey_float(t_fl_wkey *x, double f);
 void fl_wkey_bang(t_fl_wkey *x);
 void fl_wkey_message(t_fl_wkey *x, t_symbol *s, long argc, t_atom *argv);
+void fl_wkey_octave(t_fl_wkey *x, t_symbol *s, long argc, t_atom *argv);
 
 void fl_wkey_free(t_fl_wkey *x);
 

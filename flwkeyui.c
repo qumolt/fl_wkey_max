@@ -1,26 +1,15 @@
 #include "flwkey.h"
 
-/*
-void fl_wkey_tick(t_fl_wkey *x)
-{
-	if (x->pos_cursor_norm != x->fasor_cursor) {
-		x->pos_cursor_norm = x->fasor_cursor;
-		jbox_invalidate_layer((t_object *)x, NULL, ps_cursor_layer);
-		jbox_redraw((t_jbox *)x);
-	}
-
-	if (sys_getdspstate()) {	// if the dsp is still on, schedule a next pictmeter_tick() call
-		clock_fdelay(x->cursor_clock, 50);
-	}
-}
-*/
-
 void fl_wkey_paint(t_fl_wkey *x, t_object *patcherview)
 {
 	t_rect rect;
 	t_jrgba c;
+	t_jrgba c2;
 	t_jgraphics *g;
 	fl_gnote *pnotes = x->gnotes;
+
+	long *ppoly = x->polynotes;
+	long total_poly = x->total_polynotes;
 
 	long oct_div = x->oct_div;
 	long n_oct = x->n_oct;
@@ -38,8 +27,7 @@ void fl_wkey_paint(t_fl_wkey *x, t_object *patcherview)
 
 	//resize
 	jbox_get_patching_rect((t_object *)x, &rect);
-	//newrect.x = oldrect.x;
-	//newrect.y = oldrect.y;
+	//rect.x = rect.x; rect.y = rect.y;
 	rect.width = 2 * HNOTEW * (oct_div * n_oct + 1) + 2 * ALLFRAME;
 	rect.height = 3 * TNOTEH + SUPMARGIN + 2 * ALLFRAME;
 	jbox_set_patching_rect((t_object *)x, &rect);
@@ -51,6 +39,9 @@ void fl_wkey_paint(t_fl_wkey *x, t_object *patcherview)
 	object_attr_getjrgba((t_object *)x, _sym_bgcolor, &c);
 	jgraphics_set_source_jrgba(g, &c);
 	jgraphics_rectangle_fill_fast(g, 0, 0, rect.width, rect.height);
+
+	//polynotes
+	c2.red = 1.; c2.green = 0.; c2.blue = 0.5; c2.alpha = 1.;
 
 	//notes
 	rect.width = 2 * HNOTEW * (oct_div * n_oct + 1);
@@ -98,6 +89,17 @@ void fl_wkey_paint(t_fl_wkey *x, t_object *patcherview)
 				jgraphics_set_source_jrgba(g, &c);
 				jgraphics_rectangle_fill_fast(g, posx, posy, sq_w, sq_h);
 
+				//zeromark
+				if (!idx) {
+					posx = i * 2. * HNOTEW + HNOTEW - (0.5 * ZEROMARKD);
+					posy = 2.5 * TNOTEH;
+					sq_w = ZEROMARKD;
+					sq_h = ZEROMARKD;
+					if (pnotes[idx].prev_ext) { posx -= 0.5 * HNOTEW; }
+					if (pnotes[idx].next_ext) { posx += 0.5 * HNOTEW; }
+					//jgraphics_set_source_jrgba(g, &c2);
+					jgraphics_ellipse(g, posx, posy, sq_w, sq_h);
+				}
 			}
 		}
 
@@ -183,6 +185,34 @@ void fl_wkey_paint(t_fl_wkey *x, t_object *patcherview)
 			}
 		}
 
+		//polynotes
+		for (long i = 0; i < total_poly; i++) {
+			
+			sel_key = ppoly[i] - oct_div * (5 - x->c4_oct);
+
+			if (sel_key < 0 || sel_key > total_notes) { continue; }
+
+			idx = z_mod(sel_key, oct_div);
+
+			sq_w = POLYMARKE;
+			sq_h = POLYMARKE;
+
+			if (!pnotes[idx].white) {
+				posx = sel_key * 2. * HNOTEW + HNOTEW - (0.5 * POLYMARKE);
+				posy = 1.5 * TNOTEH - (0.5 * POLYMARKE);
+				jgraphics_set_source_jrgba(g, &c2);
+				jgraphics_rectangle_fill_fast(g, posx, posy, sq_w, sq_h);
+			}
+			else {
+				posx = sel_key * 2. * HNOTEW + HNOTEW - (0.5 * POLYMARKE);
+				posy = 2.5 * TNOTEH - (0.5 * POLYMARKE);
+				if (pnotes[idx].prev_ext) { posx -= 0.5 * HNOTEW; }
+				if (pnotes[idx].next_ext) { posx += 0.5 * HNOTEW; }
+				jgraphics_set_source_jrgba(g, &c2);
+				jgraphics_rectangle_fill_fast(g, posx, posy, sq_w, sq_h);
+			}
+		}
+
 		jbox_end_layer((t_object *)x, patcherview, gensym("notes_layer"));
 	}
 	jbox_paint_layer((t_object *)x, patcherview, gensym("notes_layer"), ALLFRAME, SUPMARGIN);	// position of the layer
@@ -213,7 +243,7 @@ void mouse_sendkey(t_fl_wkey *x, t_object *patcherview, t_pt pt)
 {
 	t_rect rect;
 	double allwidth, allheight;
-	long sel_note = -1;
+	long sel_key = -1;
 	long sel_notex, sel_notey;
 	long note_side;
 	long idx, idx_prev, idx_next;
@@ -245,20 +275,20 @@ void mouse_sendkey(t_fl_wkey *x, t_object *patcherview, t_pt pt)
 
 		if (sel_notey) {
 			if (pnotes[idx].white) { 
-				sel_note = sel_notex; 
+				sel_key = sel_notex; 
 				is_over_key = 1;
 			}
 			else {
 				if (note_side) {
 					if (pnotes[idx_next].prev_ext) {
-						sel_note = sel_notex + 1;
+						sel_key = sel_notex + 1;
 						is_over_key = 1;
 					}
 					else { is_over_key = 0; }
 				}
 				else {
 					if (pnotes[idx_prev].next_ext) {
-						sel_note = sel_notex - 1;
+						sel_key = sel_notex - 1;
 						is_over_key = 1;
 					}
 					else { is_over_key = 0; }
@@ -266,16 +296,16 @@ void mouse_sendkey(t_fl_wkey *x, t_object *patcherview, t_pt pt)
 			}
 		}
 		else {
-			sel_note = sel_notex;
+			sel_key = sel_notex;
 			is_over_key = 1;
 		}
 	}
 	else { is_over_key = 0; }
 	
-	x->sel_key = sel_note;
-	transp_note = sel_note + oct_div * (5 - x->c4_oct);
+	x->sel_key = sel_key;
+	transp_note = sel_key + oct_div * (5 - x->c4_oct);
 
-	if (is_key_pressed && is_over_key && last_over != sel_note) {
+	if (is_key_pressed && is_over_key && last_over != sel_key) {
 		outlet_int(x->m_outlet, transp_note);
 
 		jbox_invalidate_layer((t_object *)x, NULL, gensym("notes_layer"));
