@@ -37,36 +37,17 @@ void ext_main(void *r)
 	//CLASS_ATTR_STYLE_ALIAS_RGBA_LEGACY(c, "bgcolor", "brgba");
 	CLASS_ATTR_STYLE_ALIAS_RGBA_LEGACY(c, "bgcolor", "brgb");
 	CLASS_ATTR_LEGACYDEFAULT(c, "bgcolor", "bgcolor", 0, "1. 1. 1. 1.");
-	
-	/*
-
-	CLASS_ATTR_STYLE_RGBA_PREVIEW(c, "elementcolor", 0, t_fl_wkey, u_lineas, "Off Color", "side_arch");
-	CLASS_ATTR_BASIC(c, "elementcolor", 0);
-	CLASS_ATTR_STYLE_ALIAS_NOSAVE(c, "elementcolor", "crgb");
-	CLASS_ATTR_LEGACYDEFAULT(c, "elementcolor", "elementcolor", 0, "0.9 0.8 0.8 1.");
-
-	CLASS_ATTR_STYLE_RGBA_PREVIEW(c, "cursorcolor", 0, t_fl_wkey, u_cursor, "On Color", "side_arch");
-	CLASS_ATTR_BASIC(c, "cursorcolor", 0);
-	class_attr_stylemap(c, "cursorcolor", "color");
-	CLASS_ATTR_LEGACYDEFAULT(c, "cursorcolor", "cursorcolor", 0, "0.2 0.2 0.2 1.");
-	CLASS_ATTR_STYLE_ALIAS_NOSAVE(c, "cursorcolor", "frgba"); // ej: I doubt anyone used this but color instead so leaving it as a normal alias (will use class_attr_style_alias if something comes up)
-
-	CLASS_ATTR_RGBA(c, "textcolor", 0, t_fl_wkey, j_textcolor);
-	CLASS_ATTR_DEFAULT_SAVE_PAINT(c, "textcolor", 0, "0.9 0.9 0.9 1.");
-	CLASS_ATTR_STYLE_LABEL(c, "textcolor", 0, "rgba", "Text Color");
-	CLASS_ATTR_CATEGORY(c, "textcolor", 0, "Color");
-	*/
 	CLASS_STICKY_CATEGORY_CLEAR(c);
 
-	/*
-	CLASS_ATTR_RGBA(c, "rectcolor", 0, t_fl_wkey, j_rectcolor);
-	CLASS_ATTR_STYLE_LABEL(c, "rectcolor", 0, "rgba", "Rectangle Color");
-	CLASS_ATTR_DEFAULT_SAVE_PAINT(c, "rectcolor", 0, "0. 0. 0. 1.");
+	CLASS_ATTR_LONG(c, "octaves", 0, t_fl_wkey, n_oct);
+	CLASS_ATTR_LABEL(c, "octaves", 0, "Octaves displayed");
+	CLASS_ATTR_CATEGORY(c, "octaves", 0, "Size");
+	CLASS_ATTR_DEFAULT_SAVE_PAINT(c, "octaves", 0, "5");
 
-	CLASS_ATTR_RGBA(c, "overcolor", 0, t_fl_wkey, j_overcolor);
-	CLASS_ATTR_STYLE_LABEL(c, "overcolor", 0, "rgba", "Rectangle Over Color");
-	CLASS_ATTR_DEFAULT_SAVE_PAINT(c, "overcolor", 0, "1. 1. 1. 1.");
-	*/
+	CLASS_ATTR_LONG(c, "c4oct", 0, t_fl_wkey, c4_oct);
+	CLASS_ATTR_LABEL(c, "c4oct", 0, "C4 octave");
+	CLASS_ATTR_CATEGORY(c, "c4oct", 0, "Size");
+	CLASS_ATTR_DEFAULT_SAVE_PAINT(c, "c4oct", 0, "2");
 
 	CLASS_ATTR_INTRODUCED(c, "elementcolor", 0, "7.0.0");
 	
