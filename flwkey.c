@@ -119,26 +119,26 @@ void *fl_wkey_new(t_symbol *s, long argc, t_atom *argv)
 	
 	for (long i = 0; i < DFLT_DIVOCT; i++) {
 		x->gnotes[i].white = 0;
-		x->gnotes[i].prev_ext = 0;
-		x->gnotes[i].next_ext = 0;
+		x->gnotes[i].prev_exten = 0;
+		x->gnotes[i].next_exten = 0;
 	}
 	x->gnotes[0].white = 1;
-	x->gnotes[0].next_ext = 1;
+	x->gnotes[0].next_exten = 1;
 	x->gnotes[2].white = 1;
-	x->gnotes[2].prev_ext = 1;
-	x->gnotes[2].next_ext = 1;
+	x->gnotes[2].prev_exten = 1;
+	x->gnotes[2].next_exten = 1;
 	x->gnotes[4].white = 1;
-	x->gnotes[4].prev_ext = 1;
+	x->gnotes[4].prev_exten = 1;
 	x->gnotes[5].white = 1;
-	x->gnotes[5].next_ext = 1;
+	x->gnotes[5].next_exten = 1;
 	x->gnotes[7].white = 1;
-	x->gnotes[7].prev_ext = 1;
-	x->gnotes[7].next_ext = 1;
+	x->gnotes[7].prev_exten = 1;
+	x->gnotes[7].next_exten = 1;
 	x->gnotes[9].white = 1;
-	x->gnotes[9].prev_ext = 1;
-	x->gnotes[9].next_ext = 1;
+	x->gnotes[9].prev_exten = 1;
+	x->gnotes[9].next_exten = 1;
 	x->gnotes[11].white = 1;
-	x->gnotes[11].prev_ext = 1;
+	x->gnotes[11].prev_exten = 1;
 
 	for (long i = 0; i < LENPOLYNOTES; i++) {
 		x->polynotes[i] = 0;
@@ -243,34 +243,27 @@ void fl_wkey_message(t_fl_wkey *x, t_symbol *s, long argc, t_atom *argv)
 	for (long i = 0; i < oct_div; i++) {
 		pnotes[i].white = 0;
 		for (long j = 0; j < lenwscale; j++) {
-			if (i == pwscale[j]) { 
+			if (i == z_mod(pwscale[j],oct_div)) { 
 				pnotes[i].white = 1; 
 				break;
 			}
 		}
 	}
+
 	for (long i = 0; i < oct_div; i++) {
 		if (pnotes[i].white) {
-			pnotes[i].prev_ext = 1;
-			for (long j = 0; j < lenwscale; j++) {
-				idx = z_mod(j - 1, lenwscale);
-				if (pwscale[idx] == z_mod(i - 1, oct_div)) { 
-					pnotes[i].prev_ext = 0; 
-					break;
-				}
-			}
-			pnotes[i].next_ext = 1;
-			for (long j = 0; j < lenwscale; j++) {
-				idx = z_mod(j + 1, lenwscale);
-				if (pwscale[idx] == z_mod(i + 1, oct_div)) { 
-					pnotes[i].next_ext = 0; 
-					break;
-				}
-			}
+
+			idx = i;
+			do{	idx = z_mod(idx + 1, oct_div);} while (!pnotes[idx].white);
+			pnotes[i].next_exten = z_mod(idx - i - 1, oct_div);
+
+			idx = i;
+			do { idx = z_mod(idx - 1, oct_div); } while (!pnotes[idx].white);
+			pnotes[i].prev_exten = z_mod(i - idx - 1, oct_div);
 		}
 		else{
-			pnotes[i].prev_ext = 0;
-			pnotes[i].next_ext = 0;
+			pnotes[i].prev_exten = 0;
+			pnotes[i].next_exten = 0;
 		}
 	}
 	

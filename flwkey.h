@@ -92,8 +92,8 @@ enum OUTLETS { O_OUTPUT, NUM_OUTLETS };
 /*--------------------------------------------------------------- */
 typedef struct _fl_gnote {
 	short white;
-	short prev_ext;
-	short next_ext;
+	long prev_exten;
+	long next_exten;
 }fl_gnote;
 
 typedef struct _fl_wkey
